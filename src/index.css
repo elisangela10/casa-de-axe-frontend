@@ -1,3 +1,16 @@
+/* src/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+body {
+  background: radial-gradient(circle at bottom left, #14532d 0%, transparent 60%),
+              radial-gradient(circle at bottom right, #b91c1c 0%, transparent 70%),
+              linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent 70%);
+  background-color: #fff;
+  background-blend-mode: screen;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
