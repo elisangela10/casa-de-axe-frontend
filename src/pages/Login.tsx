@@ -33,7 +33,7 @@ export default function Login() {
           <div className="card sm:my-12 w-full shadow-none">
             <form className="card-body !p-10" onSubmit={handleLogin}>
               <div className="text-center mb-8">
-                <img src="../public/images/logo.jpg" alt="Logo" className="mx-auto auth-logo w-28 h-auto" />
+                <img src="../public/images/logo.svg" alt="Logo" className="mx-auto auth-logo w-28 h-auto" />
               </div>
               {error && (
                 <div className="text-red-600 text-sm text-center mb-3">{error}</div>
