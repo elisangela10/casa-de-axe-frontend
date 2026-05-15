@@ -62,7 +62,7 @@ export default function Register() {
             <div className="card sm:my-12 w-full shadow-none">
               <form onSubmit={handleRegister} className="card-body !p-10">
                 <div className="text-center mb-8">
-                  <img src="../public/images/logo.svg" alt="Logo" className="mx-auto auth-logo w-28 h-auto" />
+                  <img src="/images/logo.svg" alt="Logo" className="mx-auto auth-logo w-28 h-auto" />
                 </div>
                 {error && (
                   <div className="text-red-600 text-sm text-center mb-3">{error}</div>
