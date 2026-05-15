@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react"
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -12,7 +13,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   ];
 
   return (
+
     <div className="flex h-screen bg-gray-50">
+      <Analytics />
       {/* Sidebar / Menu Lateral */}
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
         <div className="flex items-center justify-center h-20 border-b border-gray-200">
@@ -63,6 +66,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
       </div>
-    </div>
+
+    </div >
+
+
   );
 }
