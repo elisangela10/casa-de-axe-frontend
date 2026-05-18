@@ -32,7 +32,7 @@ export default function Usuarios() {
 
                 setUsers(data);
             } catch {
-                setError("Não foi possível carregar os usuários da API.");
+                setError("Não foi possível carregar os usuários da API");
                 setUsers([]);
             } finally {
                 setLoading(false);
