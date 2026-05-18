@@ -6,6 +6,7 @@ import Pontos from "../pages/Pontos";
 import Usuarios from "../pages/Usuarios";
 import Guias from "../pages/Guias";
 import Calendario from "../pages/Calendario";
+import PrivateRoute from "../components/PrivateRoute";
 
 export default function AppRoutes() {
   return (
@@ -13,12 +14,11 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Register />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/pontos" element={<Pontos />} />
-        <Route path="/usuarios" element={<Usuarios />} />
-        <Route path="/guias" element={<Guias />} />
-        <Route path="/calendario" element={<Calendario />} />
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/pontos" element={<PrivateRoute><Pontos /></PrivateRoute>} />
+        <Route path="/usuarios" element={<PrivateRoute><Usuarios /></PrivateRoute>} />
+        <Route path="/guias" element={<PrivateRoute><Guias /></PrivateRoute>} />
+        <Route path="/calendario" element={<PrivateRoute><Calendario /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
   );

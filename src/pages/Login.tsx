@@ -1,21 +1,42 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import { saveToken } from "../auth/token";
 
 export default function Login() {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    if (!login.trim() || !password.trim()) {
+      setError("Preencha e-mail, usuário ou telefone e a senha para entrar.");
+      return;
+    }
+    setLoading(true);
+
     try {
-      const response = await api.post("/User/login", { login, password });
-      localStorage.setItem("token", response.data.token);
-      navigate("/dashboard");
-    } catch (err) {
+      const response = await api.post("/User/login", {
+        login: login.trim(),
+        password,
+      });
+
+      if (!response.data?.token) {
+        setError("Resposta de autenticação inválida. Tente novamente.");
+        return;
+      }
+
+      saveToken(response.data.token, rememberMe);
+      navigate("/dashboard", { replace: true });
+    } catch {
       setError("Usuário ou senha inválidos.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,11 +62,12 @@ export default function Login() {
 
               <div className="mb-3">
                 <input
-                  type="email"
+                  type="text"
                   className="form-control"
-                  placeholder="Email"
+                  placeholder="E-mail, usuário ou telefone"
                   value={login}
                   onChange={(e) => setLogin(e.target.value)}
+                  autoComplete="username"
                 />
               </div>
 
@@ -56,6 +78,7 @@ export default function Login() {
                   placeholder="Senha"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
                 />
               </div>
 
@@ -65,6 +88,8 @@ export default function Login() {
                     className="form-check-input input-primary"
                     type="checkbox"
                     id="remember"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                   />
                   <label className="form-check-label text-muted" htmlFor="remember">
                     Lembrar de mim?
@@ -76,16 +101,16 @@ export default function Login() {
               </div>
 
               <div className="mt-4 text-center">
-                <button type="submit" className="btn btn-primary mx-auto shadow-2xl">
-                  Entrar
+                <button type="submit" className="btn btn-primary mx-auto shadow-2xl" disabled={loading}>
+                  {loading ? "Entrando..." : "Entrar"}
                 </button>
               </div>
 
               <div className="flex justify-between items-end flex-wrap mt-4">
                 <h6 className="font-medium mb-0">Não tem uma conta?</h6>
-                <a href="/cadastro" className="text-primary-500">
+                <Link to="/cadastro" className="text-primary-500">
                   Criar conta
-                </a>
+                </Link>
               </div>
             </form>
           </div>

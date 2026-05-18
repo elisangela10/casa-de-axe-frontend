@@ -1,8 +1,12 @@
-import { Link, useLocation } from "react-router-dom";
-import { Analytics } from "@vercel/analytics/react"
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
+import { clearToken } from "../auth/token";
+
+
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const menuItems = [
     { path: "/dashboard", icon: "bi-house-door", label: "Dashboard" },
@@ -11,7 +15,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     { path: "/guias", icon: "bi-star", label: "Meus Guias" },
     { path: "/pontos", icon: "bi-music-note-list", label: "Meus Pontos" },
   ];
-
+  const handleLogout = () => {
+    clearToken();
+    navigate("/login", { replace: true });
+  };
   return (
 
     <div className="flex h-screen bg-gray-50">
@@ -37,13 +44,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           ))}
         </nav>
         <div className="p-4 border-t border-gray-200">
-          <Link
-            to="/login"
+
+          <button
+            onClick={handleLogout}
             className="flex items-center px-4 py-3 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors"
           >
             <i className="bi-box-arrow-right text-lg mr-3"></i>
             Sair
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -68,6 +76,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       </div>
 
     </div >
+
 
 
   );
