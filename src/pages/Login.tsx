@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
 export default function Login() {
-  const [username, setUsername] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await api.post("/User/login", { username, password });
+      const response = await api.post("/User/login", { login, password });
       localStorage.setItem("token", response.data.token);
       navigate("/dashboard");
     } catch (err) {
@@ -44,8 +44,8 @@ export default function Login() {
                   type="email"
                   className="form-control"
                   placeholder="Email"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={login}
+                  onChange={(e) => setLogin(e.target.value)}
                 />
               </div>
 
