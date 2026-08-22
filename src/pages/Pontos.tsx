@@ -1,14 +1,7 @@
 import { useState, useEffect } from "react";
 import MainLayout from "../layouts/MainLayout";
-import api from "../api/axios";
-
-interface Ponto {
-  id: number;
-  tituloDoponto: string;
-  linkDoYouTube: string;
-  letraDoPonto: string;
-  categoriaDoPontos: string;
-}
+import { getApiErrorMessage } from "../services/api";
+import { createPonto, deletePonto, listPontos, Ponto, updatePonto } from "../services/pontoService";
 
 const CATEGORIAS = [
   "Exu / Pombagira",
@@ -64,12 +57,9 @@ export default function Pontos() {
   const fetchPontos = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/TextoPonto");
-      if (response.data && response.data.length > 0) {
-        setPontos(response.data);
-      }
+      setPontos(await listPontos());
     } catch (err) {
-      console.error("Erro ao carregar pontos:", err);
+      setError(getApiErrorMessage(err, "Não foi possível carregar os pontos."));
     } finally {
       setLoading(false);
     }
@@ -88,18 +78,17 @@ export default function Pontos() {
     setSaving(true);
     try {
       if (editId) {
-        await api.put(`/TextoPonto/${editId}`, { id: editId, ...formData });
-        setPontos(pontos.map((p) => (p.id === editId ? { id: editId, ...formData } : p)));
+        const atualizado = await updatePonto(editId, formData);
+        setPontos(pontos.map((p) => (p.id === editId ? (atualizado || { id: editId, ...formData }) : p)));
         showSuccess("Ponto atualizado com sucesso!");
       } else {
-        const response = await api.post("/TextoPonto", { id: 0, ...formData });
-        const novoPonto = response.data ?? { id: Date.now(), ...formData };
+        const novoPonto = await createPonto(formData);
         setPontos([novoPonto, ...pontos]);
         showSuccess("Ponto cadastrado com sucesso!");
       }
       handleCloseModal();
     } catch (err) {
-      setError("Erro ao salvar o ponto. Verifique sua conexão e tente novamente.");
+      setError(getApiErrorMessage(err, "Não foi possível salvar o ponto."));
     } finally {
       setSaving(false);
     }
@@ -121,12 +110,11 @@ export default function Pontos() {
   const handleDelete = async (id: number) => {
     if (!confirm("Tem certeza que deseja excluir este ponto?")) return;
     try {
-      await api.delete(`/TextoPonto/${id}`);
+      await deletePonto(id);
       setPontos(pontos.filter((p) => p.id !== id));
       showSuccess("Ponto excluído com sucesso!");
-    } catch {
-      // se a API não tiver DELETE, remove só localmente
-      setPontos(pontos.filter((p) => p.id !== id));
+    } catch (err) {
+      setError(getApiErrorMessage(err, "Não foi possível excluir o ponto."));
     }
   };
 
@@ -234,7 +222,7 @@ export default function Pontos() {
           </h3>
           <p className="text-gray-500 text-sm">
             {pontos.length === 0
-              ? "Clique em "Novo Ponto" para começar a montar o acervo."
+              ? "Clique em Novo Ponto para começar a montar o acervo."
               : "Tente ajustar os filtros de busca."}
           </p>
         </div>

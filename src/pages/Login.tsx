@@ -1,7 +1,30 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api/axios";
+import axios from "axios";
+import api from "../services/api";
 import { saveToken } from "../auth/token";
+
+function getLoginErrorMessage(error: unknown) {
+  if (axios.isAxiosError(error)) {
+    if (!error.response) {
+      return "Não foi possível conectar à API. Verifique se o backend está em execução e se VITE_API_URL está correto.";
+    }
+
+    const status = error.response.status;
+    const apiMessage = error.response.data?.message;
+
+    if (status === 401) return apiMessage || "Usuário ou senha inválidos.";
+    if (status === 400) return apiMessage || "Confira os dados informados para entrar.";
+    if (status === 404) return "Endpoint de login não encontrado. Verifique a URL da API.";
+    return apiMessage || `A API retornou um erro (${status}). Tente novamente mais tarde.`;
+  }
+
+  if (error instanceof Error && error.message === "invalid_response") {
+    return "A API respondeu sem fornecer um token de acesso.";
+  }
+
+  return "Não foi possível concluir o login. Tente novamente.";
+}
 
 export default function Login() {
   const [login, setLogin] = useState("");
@@ -11,112 +34,18 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (!login.trim() || !password.trim()) {
-      setError("Preencha e-mail, usuário ou telefone e a senha para entrar.");
-      return;
-    }
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault(); setError("");
+    if (!login.trim() || !password) { setError("Informe seu usuário ou e-mail e sua senha."); return; }
     setLoading(true);
-
     try {
-      const response = await api.post("/User/login", {
-        login: login.trim(),
-        password,
-      });
-
-      if (!response.data?.token) {
-        setError("Resposta de autenticação inválida. Tente novamente.");
-        return;
-      }
-
-      saveToken(response.data.token, rememberMe);
-      navigate("/dashboard", { replace: true });
-    } catch {
-      setError("Usuário ou senha inválidos.");
-    } finally {
-      setLoading(false);
-    }
+      const response = await api.post("/User/login", { login: login.trim(), password }, { requiresAuth: false });
+      if (!response.data?.token) throw new Error("invalid_response");
+      saveToken(response.data.token, rememberMe); navigate("/dashboard", { replace: true });
+    } catch (error) {
+      setError(getLoginErrorMessage(error));
+    } finally { setLoading(false); }
   };
 
-  return (<div className="auth-main relative">
-    <div className="auth-wrapper v1 flex items-center w-full h-full min-h-screen">
-      <div className="auth-form flex items-center justify-center grow flex-col min-h-screen relative p-6">
-        <div className="w-full max-w-[350px] relative">
-          <div className="auth-bg">
-            <span className="absolute top-[-100px] right-[-100px] w-[300px] h-[300px] block rounded-full bg-red-700 animate-[floating_7s_infinite]" />
-            <span className="absolute top-[150px] right-[-150px] w-5 h-5 block rounded-full bg-amber-900 animate-[floating_9s_infinite]" />
-            <span className="absolute left-[-150px] bottom-[150px] w-5 h-5 block rounded-full bg-red-800 animate-[floating_7s_infinite]" />
-            <span className="absolute left-[-100px] bottom-[-100px] w-[300px] h-[300px] block rounded-full bg-amber-800 animate-[floating_9s_infinite]" />
-          </div>
-
-          <div className="card sm:my-12 w-full shadow-none">
-            <form className="card-body !p-10" onSubmit={handleLogin}>
-              <div className="text-center mb-8">
-                <img src="/images/logo.svg" alt="Logo" className="mx-auto auth-logo w-28 h-auto" />
-              </div>
-              {error && (
-                <div className="text-red-600 text-sm text-center mb-3">{error}</div>
-              )}
-
-              <div className="mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="E-mail, usuário ou telefone"
-                  value={login}
-                  onChange={(e) => setLogin(e.target.value)}
-                  autoComplete="username"
-                />
-              </div>
-
-              <div className="mb-4">
-                <input
-                  type="password"
-                  className="form-control"
-                  placeholder="Senha"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
-                />
-              </div>
-
-              <div className="flex mt-1 justify-between items-center flex-wrap">
-                <div className="form-check">
-                  <input
-                    className="form-check-input input-primary"
-                    type="checkbox"
-                    id="remember"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                  />
-                  <label className="form-check-label text-muted" htmlFor="remember">
-                    Lembrar de mim?
-                  </label>
-                </div>
-                <h6 className="font-normal text-primary-500 mb-0">
-                  <a href="#">Esqueceu a senha?</a>
-                </h6>
-              </div>
-
-              <div className="mt-4 text-center">
-                <button type="submit" className="btn btn-primary mx-auto shadow-2xl" disabled={loading}>
-                  {loading ? "Entrando..." : "Entrar"}
-                </button>
-              </div>
-
-              <div className="flex justify-between items-end flex-wrap mt-4">
-                <h6 className="font-medium mb-0">Não tem uma conta?</h6>
-                <Link to="/cadastro" className="text-primary-500">
-                  Criar conta
-                </Link>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  );
+  return <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-amber-950 via-stone-900 to-emerald-950 p-4"><div className="grid w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl md:grid-cols-2"><section className="hidden flex-col justify-between bg-amber-900 p-10 text-white md:flex"><div><img src="/images/logo-white.svg" alt="Casa de Axé" className="h-14 w-auto" /><p className="mt-16 text-sm font-semibold uppercase tracking-[.2em] text-amber-200">Gestão da Casa</p><h1 className="mt-4 text-4xl font-bold leading-tight">Tudo o que a Casa precisa, em um só lugar.</h1><p className="mt-5 leading-7 text-amber-100">Organize giras, membros, guias e pontos cantados com cuidado e simplicidade.</p></div><p className="text-sm text-amber-200">Ilê Tenda São Gerônimo</p></section><section className="p-6 sm:p-10"><div className="mb-8 md:hidden"><img src="/images/logo.svg" alt="Casa de Axé" className="mx-auto h-14 w-auto" /></div><div className="mx-auto max-w-md"><p className="text-sm font-semibold uppercase tracking-wider text-amber-700">Bem-vindo de volta</p><h2 className="mt-2 text-3xl font-bold text-gray-900">Entrar na sua conta</h2><p className="mt-2 text-sm text-gray-500">Acesse o painel administrativo da Casa.</p><form onSubmit={handleLogin} className="mt-8 space-y-5"><div><label htmlFor="login" className="mb-1.5 block text-sm font-medium text-gray-700">Usuário, e-mail ou telefone</label><input id="login" type="text" required value={login} onChange={(event) => setLogin(event.target.value)} autoComplete="username" className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-200" /></div><div><label htmlFor="password" className="mb-1.5 block text-sm font-medium text-gray-700">Senha</label><input id="password" type="password" required value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-200" /></div><div className="flex items-center justify-between gap-4 text-sm"><label className="flex items-center gap-2 text-gray-600"><input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="rounded border-gray-300 text-amber-700 focus:ring-amber-500" />Lembrar de mim</label><span className="text-gray-400">Esqueceu a senha? Fale com a direção.</span></div>{error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}<button disabled={loading} className="w-full rounded-xl bg-amber-700 px-4 py-3 font-semibold text-white transition hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-60">{loading ? "Entrando..." : "Entrar"}</button></form><p className="mt-8 text-center text-sm text-gray-600">Ainda não tem uma conta? <Link to="/cadastro" className="font-semibold text-amber-700 hover:text-amber-900">Criar conta</Link></p></div></section></div></main>;
 }

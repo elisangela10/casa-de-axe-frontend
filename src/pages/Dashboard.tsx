@@ -1,214 +1,38 @@
-import MainLayout from "../layouts/MainLayout";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import MainLayout from "../layouts/MainLayout";
+import api from "../services/api";
+import { readLocal } from "../lib/localStore";
+
+type Gira = { id: number; data: string; titulo: string; guiaCura?: string };
+const GIRAS_KEY = "casa_de_axe_giras";
 
 export default function Dashboard() {
-  return (
-    <MainLayout>
-      {/* Container Principal */}
-      <div className="space-y-6">
+  const [users, setUsers] = useState(0);
+  const [pontos, setPontos] = useState(0);
+  const [giras, setGiras] = useState<Gira[]>(() => readLocal(GIRAS_KEY, []));
+  const [loading, setLoading] = useState(true);
 
-        {/* Banner de Boas-vindas */}
-        <div className="bg-gradient-to-r from-amber-700 to-amber-900 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
-          <div className="relative z-10">
-            <h2 className="text-3xl font-bold mb-2">Bem-vindo(a) à Casa de Axé</h2>
-            <p className="text-amber-100 max-w-2xl">
-              Gerencie suas giras, calendário, membros e pontos de forma centralizada e organizada.
-            </p>
-          </div>
-          <i className="bi-sun-fill absolute -right-10 -bottom-10 text-9xl text-white opacity-10"></i>
-        </div>
+  useEffect(() => {
+    Promise.allSettled([api.get("/User/GetUser"), api.get("/TextoPonto")]).then(([usersResult, pontosResult]) => {
+      if (usersResult.status === "fulfilled") { const data = usersResult.value.data; setUsers(Array.isArray(data) ? data.length : Array.isArray(data?.data) ? data.data.length : 0); }
+      if (pontosResult.status === "fulfilled") { const data = pontosResult.value.data; setPontos(Array.isArray(data) ? data.length : Array.isArray(data?.data) ? data.data.length : 0); }
+    }).finally(() => setLoading(false));
+  }, []);
 
-        {/* Resumo Rápido (Top Cards) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Card 1: Giras do Mês */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 font-medium mb-1">Giras no Mês</p>
-              <h3 className="text-3xl font-bold text-gray-800">4</h3>
-            </div>
-            <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-2xl">
-              <i className="bi-calendar-heart"></i>
-            </div>
-          </div>
+  const upcoming = giras.filter((gira) => new Date(gira.data).getTime() >= Date.now()).sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()).slice(0, 4);
+  const stats = [
+    { label: "Giras próximas", value: upcoming.length, icon: "bi-calendar-heart", tone: "bg-amber-100 text-amber-700" },
+    { label: "Membros cadastrados", value: users, icon: "bi-people", tone: "bg-blue-100 text-blue-700" },
+    { label: "Pontos no acervo", value: pontos, icon: "bi-music-note-beamed", tone: "bg-purple-100 text-purple-700" },
+  ];
+  const formatDate = (date: string) => new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(date));
 
-          {/* Card 2: Filhos da Casa */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 font-medium mb-1">Filhos da Casa</p>
-              <h3 className="text-3xl font-bold text-gray-800">42</h3>
-            </div>
-            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl">
-              <i className="bi-people"></i>
-            </div>
-          </div>
-
-          {/* Card 3: Assistentes / Visitantes */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 font-medium mb-1">Assistentes Cadastrados</p>
-              <h3 className="text-3xl font-bold text-gray-800">128</h3>
-            </div>
-            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl">
-              <i className="bi-person-hearts"></i>
-            </div>
-          </div>
-
-          {/* Card 4: Total de Pontos */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 font-medium mb-1">Pontos do Acervo</p>
-              <h3 className="text-3xl font-bold text-gray-800">315</h3>
-            </div>
-            <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-2xl">
-              <i className="bi-music-note-beamed"></i>
-            </div>
-          </div>
-        </div>
-
-        {/* Divisão Principal: Calendário e Usuários */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          {/* Coluna Esquerda: Calendário de Giras (ocupa 2 blocos) */}
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="text-lg font-bold text-gray-800">Próximas Giras e Obrigações</h3>
-              <Link to="/calendario" className="text-sm font-medium text-amber-600 hover:text-amber-800">
-                Ver calendário completo &rarr;
-              </Link>
-            </div>
-
-            <div className="p-0">
-              {/* Evento 1 */}
-              <div className="p-6 border-b border-gray-50 hover:bg-gray-50 transition-colors flex gap-6 items-start">
-                <div className="bg-red-50 text-red-700 w-16 h-16 rounded-xl flex flex-col items-center justify-center flex-shrink-0">
-                  <span className="text-sm font-bold uppercase">OUT</span>
-                  <span className="text-2xl font-black">12</span>
-                </div>
-                <div>
-                  <h4 className="text-lg font-bold text-gray-800 mb-1">Gira de Esquerda (Exu e Pombagira)</h4>
-                  <p className="text-gray-500 text-sm mb-3">
-                    <i className="bi-clock mr-1"></i> Sábado, 20:00 - 23:30
-                  </p>
-                  <div className="flex gap-2">
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full">Roupa Preta/Vermelha</span>
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full">Aberto ao Público</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Evento 2 */}
-              <div className="p-6 border-b border-gray-50 hover:bg-gray-50 transition-colors flex gap-6 items-start">
-                <div className="bg-amber-50 text-amber-700 w-16 h-16 rounded-xl flex flex-col items-center justify-center flex-shrink-0">
-                  <span className="text-sm font-bold uppercase">OUT</span>
-                  <span className="text-2xl font-black">20</span>
-                </div>
-                <div>
-                  <h4 className="text-lg font-bold text-gray-800 mb-1">Gira de Caboclos e Boiadeiros</h4>
-                  <p className="text-gray-500 text-sm mb-3">
-                    <i className="bi-clock mr-1"></i> Domingo, 16:00 - 20:00
-                  </p>
-                  <div className="flex gap-2">
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full">Roupa Branca</span>
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full">Toque de Atabaque</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Evento 3 */}
-              <div className="p-6 border-b border-gray-50 hover:bg-gray-50 transition-colors flex gap-6 items-start">
-                <div className="bg-blue-50 text-blue-700 w-16 h-16 rounded-xl flex flex-col items-center justify-center flex-shrink-0">
-                  <span className="text-sm font-bold uppercase">NOV</span>
-                  <span className="text-2xl font-black">02</span>
-                </div>
-                <div>
-                  <h4 className="text-lg font-bold text-gray-800 mb-1">Festa de Obaluaê</h4>
-                  <p className="text-gray-500 text-sm mb-3">
-                    <i className="bi-clock mr-1"></i> Sábado, 19:30 - 00:00
-                  </p>
-                  <div className="flex gap-2">
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full">Obrigação</span>
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full">Pipoca</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Coluna Direita: Divisão por Usuários e Resumos */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h3 className="text-lg font-bold text-gray-800 mb-6">Divisão de Usuários</h3>
-
-              <div className="space-y-4">
-                {/* Entidade 1 */}
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="font-semibold text-gray-700">Mãe/Pai de Santo</span>
-                    <span className="text-gray-500">2</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2">
-                    <div className="bg-amber-600 h-2 rounded-full" style={{ width: '5%' }}></div>
-                  </div>
-                </div>
-
-                {/* Entidade 2 */}
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="font-semibold text-gray-700">Mãe/Pai Pequeno</span>
-                    <span className="text-gray-500">4</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2">
-                    <div className="bg-amber-500 h-2 rounded-full" style={{ width: '10%' }}></div>
-                  </div>
-                </div>
-
-                {/* Entidade 3 */}
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="font-semibold text-gray-700">Ogan / Ekedi</span>
-                    <span className="text-gray-500">8</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: '20%' }}></div>
-                  </div>
-                </div>
-
-                {/* Entidade 4 */}
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="font-semibold text-gray-700">Filhos de Santo</span>
-                    <span className="text-gray-500">28</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '65%' }}></div>
-                  </div>
-                </div>
-
-                <div className="pt-4 mt-6 border-t border-gray-100 text-center">
-                  <Link to="/usuarios" className="btn btn-primary w-full shadow-md hover:shadow-lg transition-all text-sm py-2">
-                    Gerenciar Hierarquia
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Micro-aviso card */}
-            <div className="bg-amber-50 rounded-xl border border-amber-200 p-5">
-              <div className="flex gap-3">
-                <i className="bi-megaphone text-amber-700 text-xl mt-1"></i>
-                <div>
-                  <h4 className="font-bold text-amber-900">Aviso da Direção</h4>
-                  <p className="text-amber-800 text-sm mt-1">
-                    A próxima reunião geral para organizar a festa de Exu ocorrerá no dia 10 de Outubro às 19:00h. Não faltem!
-                  </p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </div>
-    </MainLayout>
-  );
+  return <MainLayout>
+    <div className="space-y-6">
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-800 via-amber-900 to-stone-950 p-6 text-white shadow-lg md:p-8"><div className="relative z-10 max-w-2xl"><p className="mb-2 text-sm font-semibold uppercase tracking-wider text-amber-200">Painel da Casa</p><h1 className="text-2xl font-bold md:text-3xl">Bem-vindo(a) à Casa de Axé</h1><p className="mt-3 text-sm leading-6 text-amber-100 md:text-base">Organize suas giras, membros, guias e pontos cantados em um só lugar.</p></div><i className="bi-sun-fill absolute -bottom-10 -right-6 text-[10rem] text-white/10" /></section>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">{stats.map((stat) => <article key={stat.label} className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-5 shadow-sm"><div><p className="text-sm text-gray-500">{stat.label}</p><p className="mt-1 text-3xl font-bold text-gray-900">{loading ? "—" : stat.value}</p></div><div className={`flex h-12 w-12 items-center justify-center rounded-full text-xl ${stat.tone}`}><i className={stat.icon} /></div></article>)}</div>
+      <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]"><section className="rounded-xl border border-gray-200 bg-white shadow-sm"><div className="flex items-center justify-between border-b border-gray-200 p-5"><div><h2 className="font-bold text-gray-900">Próximas giras</h2><p className="mt-1 text-sm text-gray-500">Acompanhe os próximos compromissos da Casa.</p></div><Link to="/calendario" className="text-sm font-semibold text-amber-700 hover:text-amber-900">Ver calendário</Link></div>{upcoming.length === 0 ? <div className="p-10 text-center text-gray-500"><i className="bi-calendar-x mb-3 block text-4xl text-gray-300" /><p>Nenhuma gira futura cadastrada.</p><Link to="/calendario" className="mt-3 inline-block text-sm font-semibold text-amber-700">Cadastrar gira</Link></div> : <div className="divide-y divide-gray-100">{upcoming.map((gira) => <div key={gira.id} className="flex items-center gap-4 p-5"><div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-amber-50 text-amber-700"><span className="text-xl font-black">{new Date(gira.data).getDate()}</span><span className="text-[10px] font-bold uppercase">{new Date(gira.data).toLocaleDateString("pt-BR", { month: "short" }).replace(".", "")}</span></div><div className="min-w-0"><h3 className="truncate font-semibold text-gray-900">{gira.titulo}</h3><p className="mt-1 text-sm capitalize text-gray-500"><i className="bi-clock mr-1" />{formatDate(gira.data)}</p>{gira.guiaCura && <p className="mt-1 truncate text-xs text-gray-500">{gira.guiaCura}</p>}</div></div>)}</div>}</section><section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"><h2 className="font-bold text-gray-900">Acesso rápido</h2><p className="mt-1 text-sm text-gray-500">Continue de onde parou.</p><div className="mt-5 grid gap-3">{[["/pontos", "bi-music-note-list", "Consultar pontos"], ["/guias", "bi-stars", "Meus guias"], ["/calendario", "bi-calendar-event", "Calendário"]].map(([path, icon, label]) => <Link key={path} to={path} className="flex items-center gap-3 rounded-lg border border-gray-200 p-3 text-sm font-medium text-gray-700 transition-colors hover:border-amber-300 hover:bg-amber-50 hover:text-amber-800"><i className={`${icon} text-lg text-amber-700`} />{label}<i className="bi-arrow-right ml-auto" /></Link>)}</div></section></div>
+    </div>
+  </MainLayout>;
 }
