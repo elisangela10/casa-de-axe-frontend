@@ -61,7 +61,7 @@ test("reflete no calendário os campos nome e dataHora da API", async ({ page })
     await route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify([{ id: 7, nome: "Gira retornada pela API", dataHora: "2030-12-10T20:00:00Z", cura: "Caboclo", responsavel: "Pai da Casa", descricao: "Encontro da Casa" }]),
+      body: JSON.stringify([{ id: 7, nome: "Gira retornada pela API", dataHora: "2030-12-10T20:00:00Z", cura: "Caboclo", responsavel: "Pai da Casa", descricao: "Encontro da Casa", status: "Ativo", dataCriacao: "2030-01-01T12:00:00Z" }]),
     });
   });
   await authenticate(page);

@@ -1,5 +1,4 @@
 {
-    "vercelAnalytics": true,
     "rewrites": [
         {
             "source": "/(.*)",

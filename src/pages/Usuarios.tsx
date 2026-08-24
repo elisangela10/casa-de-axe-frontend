@@ -12,7 +12,7 @@ const ENDPOINT = import.meta.env.VITE_USUARIOS_ENDPOINT || "/User/GetUser";
 const EMPTY: UserForm = { nomeCompleto: "", email: "", telefone: "", username: "", password: "", role: "Filho", status: "ativo" };
 const text = (value: unknown) => value == null ? "" : String(value);
 
-export default function UsuariosAtualizado() {
+export default function Usuarios() {
   const [users, setUsers] = useState<User[]>(() => readLocal(STORAGE_KEY, []));
   const [formData, setFormData] = useState(EMPTY); const [editId, setEditId] = useState<number | null>(null); const [modalOpen, setModalOpen] = useState(false); const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [query, setQuery] = useState(""); const [roleFilter, setRoleFilter] = useState(""); const [error, setError] = useState("");
   useEffect(() => { let active = true; api.get(ENDPOINT).then(({ data }) => { const items = (Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []) as Record<string, unknown>[]; const normalized = items.map((item): User => ({ id: Number(item.id ?? item.Id) || Date.now(), nomeCompleto: text(item.nomeCompleto ?? item.NomeCompleto), email: text(item.email ?? item.Email), telefone: text(item.telefone ?? item.Telefone), username: text(item.username ?? item.Username), roleNome: text(item.roleNome ?? item.RoleNome ?? roleNameFromId(item.RoleId) ?? "Filho"), statusNome: text(item.statusNome ?? item.StatusNome ?? (Number(item.StatusUsuarioId) === 1 ? "Ativo" : "Inativo")) })); if (active && normalized.length) { setUsers(normalized); writeLocal(STORAGE_KEY, normalized); } }).catch(() => undefined).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, []);

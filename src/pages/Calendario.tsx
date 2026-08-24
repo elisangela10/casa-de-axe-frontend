@@ -10,7 +10,7 @@ const STORAGE_KEY = "casa_de_axe_giras";
 const ENDPOINT = getGirasEndpoint();
 const EMPTY = { data: "", titulo: "", guiaCura: "", descricao: "", linha: "" };
 
-export default function CalendarioAtualizado() {
+export default function Calendario() {
   const [giras, setGiras] = useState<Gira[]>(() => readLocal(STORAGE_KEY, []));
   const [formData, setFormData] = useState(EMPTY);
   const [editId, setEditId] = useState<number | null>(null);
@@ -38,7 +38,7 @@ export default function CalendarioAtualizado() {
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!formData.data || !formData.titulo.trim() || !formData.linha) { setError("Informe a data, o título e a linha da gira."); return; }
+    if (!formData.data || !formData.titulo.trim()) { setError("Informe a data e o título da gira."); return; }
     setSaving(true); setError("");
     try {
       let saved: Gira;

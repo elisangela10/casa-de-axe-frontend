@@ -50,6 +50,8 @@ test.describe("navegação e acesso", () => {
     await page.goto("/site", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Um espaço para cuidar, aprender e caminhar junto." })).toBeVisible();
     await expect(page.getByRole("link", { name: /Siga a Casa/ })).toHaveAttribute("href", "https://www.instagram.com/tendasaojeronimo_/");
+    await expect(page.locator('#instagram [data-behold-id="G0YuxFIQ3sjEBD23Fppk"]')).toBeVisible();
+    await expect(page.locator('script[src="https://w.behold.so/widget.js"]')).toHaveCount(1);
   });
 
   test("redireciona a raiz para login", async ({ page }) => {
@@ -117,6 +119,7 @@ test.describe("módulos autenticados", () => {
     await page.getByLabel("Linha da gira *").selectOption({ index: 1 });
     await page.getByRole("button", { name: "Salvar gira" }).click();
     await expect(page.getByRole("heading", { name: "Gira de Teste" })).toBeVisible();
+    await expect(page.getByText("Exu", { exact: true })).toBeVisible();
   });
 
   test("administra usuários", async ({ page }) => {
