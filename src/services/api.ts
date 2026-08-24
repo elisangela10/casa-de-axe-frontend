@@ -7,7 +7,10 @@ declare module "axios" {
   }
 }
 
-const configuredApiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const configuredApiUrl = String(import.meta.env.VITE_API_URL || "").trim();
+if (!configuredApiUrl) {
+  throw new Error("VITE_API_URL não configurada.");
+}
 const apiRoot = configuredApiUrl.replace(/\/+$/, "").replace(/\/api$/i, "");
 
 export const API_BASE_URL = `${apiRoot}/api`;
