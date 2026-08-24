@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const apiUrl = "http://localhost:5260/api";
+const apiUrl = "http://localhost:5000/api";
 
 function tokenFor(role = "user") {
   const header = btoa(JSON.stringify({ alg: "none", typ: "JWT" }));
@@ -18,7 +18,7 @@ async function mockApi(page: Page) {
     const request = route.request();
     const url = request.url();
     if (request.method() === "GET" && url.endsWith("/User/GetUser")) {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([{ id: 1, nomeCompleto: "Mãe Joana", email: "joana@casa.test", telefone: "11999999999", username: "joana", roleNome: "admin", statusNome: "ativo" }]) });
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([{ Id: 1, NomeCompleto: "Mãe Joana", Email: "joana@casa.test", Telefone: "11999999999", Username: "joana", RoleId: 1, StatusUsuarioId: 1 }]) });
       return;
     }
     if (request.method() === "GET" && url.endsWith("/TextoPonto")) {
@@ -114,19 +114,20 @@ test.describe("módulos autenticados", () => {
     await page.getByRole("button", { name: "Nova gira" }).click();
     await page.getByLabel("Data e hora *").fill("2030-12-10T20:00");
     await page.getByLabel("Título *").fill("Gira de Teste");
+    await page.getByLabel("Linha da gira *").selectOption({ index: 1 });
     await page.getByRole("button", { name: "Salvar gira" }).click();
     await expect(page.getByRole("heading", { name: "Gira de Teste" })).toBeVisible();
   });
 
   test("administra usuários", async ({ page }) => {
     await page.goto("/usuarios", { waitUntil: "domcontentloaded" });
-    await expect(page.getByText("Mãe Joana")).toBeVisible();
+    await expect(page.getByRole("table").getByText("Mãe Joana")).toBeVisible();
     await page.getByRole("button", { name: "Novo membro" }).click();
-    await page.getByLabel("Nome completo *").fill("Novo Membro");
-    await page.getByLabel("E-mail *").fill("membro@casa.test");
-    await page.getByLabel("Usuário *").fill("membro");
-    await page.getByLabel("Senha *", { exact: true }).fill("123456");
+    await page.getByLabel("Nome completo").fill("Novo Membro");
+    await page.getByLabel("E-mail").fill("membro@casa.test");
+    await page.getByRole("textbox", { name: "Usuário *" }).fill("membro");
+    await page.getByRole("textbox", { name: "Senha *", exact: true }).fill("123456");
     await page.getByRole("button", { name: "Salvar membro" }).click();
-    await expect(page.getByText("Novo Membro", { exact: true })).toBeVisible();
+    await expect(page.getByRole("cell").filter({ hasText: "Novo Membro" }).first()).toBeVisible();
   });
 });

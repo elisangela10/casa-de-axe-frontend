@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import api, { isApiErrorStatus } from "../services/api";
+import { listGiras, type Gira } from "../services/giraService";
 
-type Gira = { id: number; data: string; titulo: string; guiaCura?: string; descricao?: string };
 type Ponto = { id: number; tituloDoponto?: string; tituloDoPonto?: string; letraDoPonto?: string; categoriaDoPontos?: string; linkDoYouTube?: string };
 type InstagramMedia = { id: string; caption?: string; media_type?: string; media_url?: string; thumbnail_url?: string; permalink?: string; timestamp?: string };
 
 const instagramProfile = "https://www.instagram.com/tendasaojeronimo_/";
-const giraEndpoint = import.meta.env.VITE_GIRAS_ENDPOINT || "/Gira";
 const pontoEndpoint = import.meta.env.VITE_PONTOS_ENDPOINT || "/TextoPonto";
 const instagramEndpoint = (import.meta.env.VITE_INSTAGRAM_FEED_URL || "/instagram").replace(/^\/api(?=\/)/, "");
 
@@ -31,10 +30,10 @@ export default function SitePublico() {
 
   useEffect(() => {
     Promise.allSettled([
-      api.get(giraEndpoint, { requiresAuth: false }),
+      listGiras(),
       api.get(pontoEndpoint, { requiresAuth: false }),
     ]).then(([girasResult, pontosResult]) => {
-      if (girasResult.status === "fulfilled") setGiras(listFromResponse<Gira>(girasResult.value.data));
+      if (girasResult.status === "fulfilled") setGiras(girasResult.value);
       if (pontosResult.status === "fulfilled") setPontos(listFromResponse<Ponto>(pontosResult.value.data));
     }).finally(() => setLoading(false));
   }, []);

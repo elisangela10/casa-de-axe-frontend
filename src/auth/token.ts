@@ -4,8 +4,11 @@ export type AuthUser = {
     id?: number | string;
     nomeCompleto?: string;
     username?: string;
+    email?: string;
+    telefone?: string;
     role?: string;
     roleNome?: string;
+    statusNome?: string;
 };
 
 export function getToken(): string | null {
@@ -60,15 +63,28 @@ export function getCurrentUser(): AuthUser | null {
 
     return {
         id: (payload.sub ?? payload["nameid"]) as string | undefined,
-        nomeCompleto: (payload["name"] ?? payload["nomeCompleto"]) as string | undefined,
-        username: payload["unique_name"] as string | undefined,
+        nomeCompleto: (payload["name"] ?? payload["nomeCompleto"] ?? payload["nomeCompletoUsuario"]) as string | undefined,
+        username: (payload["unique_name"] ?? payload["preferred_username"] ?? payload["username"]) as string | undefined,
+        email: (payload["email"] ?? payload["emailaddress"]) as string | undefined,
+        telefone: (payload["phone_number"] ?? payload["telefone"]) as string | undefined,
         role: (payload.role ?? payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]) as string | undefined,
-        roleNome: payload.roleNome as string | undefined,
+        roleNome: (payload.roleNome ?? payload["role_name"]) as string | undefined,
+        statusNome: (payload.statusNome ?? payload["status"]) as string | undefined,
     };
 }
 
 export function hasRole(roles: string[]): boolean {
-    const user = getCurrentUser();
-    const role = (user?.roleNome || user?.role || "").toLowerCase();
-    return roles.some((allowedRole) => allowedRole.toLowerCase() === role);
+    return hasUserRole(getCurrentUser(), roles);
+}
+
+export function hasUserRole(user: AuthUser | null, roles: string[]): boolean {
+    const role = (user?.roleNome || user?.role || "").toLowerCase().trim();
+    return roles.some((allowedRole) => {
+        const allowed = allowedRole.toLowerCase().trim();
+        return role === allowed
+            || role.endsWith(`_${allowed}`)
+            || (allowed === "admin" && role.includes("admin"))
+            || (allowed === "admin" && role === "adm")
+            || (allowed === "administrador" && role.includes("administrador"));
+    });
 }

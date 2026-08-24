@@ -37,7 +37,7 @@ Frontend React + TypeScript do CRM da Casa de Axé Ilê Tenda São Gerônimo.
 Copie `.env.example` para `.env.local` e ajuste a URL da API. O cliente acrescenta `/api` automaticamente:
 
 ```env
-VITE_API_URL=http://localhost:5260
+VITE_API_URL=http://localhost:5000
 # alternativa HTTPS:
 # VITE_API_URL=https://localhost:7218
 ```

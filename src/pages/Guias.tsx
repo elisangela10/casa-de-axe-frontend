@@ -2,12 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
 import api from "../services/api";
 import { readLocal, writeLocal } from "../lib/localStore";
+import { LINHAS_CASA } from "../constants/linhasCasa";
 
 type Guia = { id: number; nome: string; linha: string; caracteristicas: string };
 const STORAGE_KEY = "casa_de_axe_guias";
 const ENDPOINT = import.meta.env.VITE_GUIAS_ENDPOINT || "/Guia";
 const EMPTY: Omit<Guia, "id"> = { nome: "", linha: "", caracteristicas: "" };
-const linhas = ["Preto Velho", "Caboclo", "Erê", "Baiano", "Boiadeiro", "Marinheiro", "Zé Pelintra / Malandro", "Exu", "Pombagira", "Exu Mirim", "Cigano", "Oriente", "Outro"];
+const linhas = LINHAS_CASA;
 
 export default function Guias() {
   const [guias, setGuias] = useState<Guia[]>(() => readLocal(STORAGE_KEY, []));

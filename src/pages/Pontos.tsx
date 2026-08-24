@@ -2,32 +2,9 @@ import { useState, useEffect } from "react";
 import MainLayout from "../layouts/MainLayout";
 import { getApiErrorMessage } from "../services/api";
 import { createPonto, deletePonto, listPontos, Ponto, updatePonto } from "../services/pontoService";
+import { getLinhaCasaColor, LINHAS_CASA } from "../constants/linhasCasa";
 
-const CATEGORIAS = [
-  "Exu / Pombagira",
-  "Preto Velho / Preta Velha",
-  "Caboclo / Cabocla",
-  "Erê / Criança",
-  "Baiano / Baiana",
-  "Boiadeiro",
-  "Marinheiro",
-  "Zé Pelintra / Malandro",
-  "Orixá",
-  "Outro",
-];
-
-const CATEGORIA_COLORS: Record<string, string> = {
-  "Exu / Pombagira": "bg-red-100 text-red-700",
-  "Preto Velho / Preta Velha": "bg-stone-100 text-stone-700",
-  "Caboclo / Cabocla": "bg-green-100 text-green-700",
-  "Erê / Criança": "bg-yellow-100 text-yellow-700",
-  "Baiano / Baiana": "bg-blue-100 text-blue-700",
-  "Boiadeiro": "bg-orange-100 text-orange-700",
-  "Marinheiro": "bg-cyan-100 text-cyan-700",
-  "Zé Pelintra / Malandro": "bg-purple-100 text-purple-700",
-  "Orixá": "bg-amber-100 text-amber-700",
-  "Outro": "bg-gray-100 text-gray-600",
-};
+const CATEGORIAS = LINHAS_CASA;
 
 const EMPTY_FORM = {
   tituloDoponto: "",
@@ -231,7 +208,7 @@ export default function Pontos() {
           {pontosFiltrados.map((ponto) => {
             const isExpanded = expandedId === ponto.id;
             const ytId = getYoutubeId(ponto.linkDoYouTube);
-            const badgeClass = CATEGORIA_COLORS[ponto.categoriaDoPontos] ?? "bg-gray-100 text-gray-600";
+            const badgeClass = getLinhaCasaColor(ponto.categoriaDoPontos);
 
             return (
               <div

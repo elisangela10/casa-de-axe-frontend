@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const apiUrl = "http://localhost:5260/api";
+const apiUrl = "http://localhost:5000/api";
 
 function tokenFor(role = "admin") {
   const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -54,4 +54,36 @@ test("exibe mensagem amigável quando o Instagram retorna 503", async ({ page })
   });
   await page.goto("/site");
   await expect(page.getByText("O feed está temporariamente indisponível. Tente novamente mais tarde.")).toBeVisible();
+});
+
+test("reflete no calendário os campos nome e dataHora da API", async ({ page }) => {
+  await page.route(`${apiUrl}/Gira`, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([{ id: 7, nome: "Gira retornada pela API", dataHora: "2030-12-10T20:00:00Z", cura: "Caboclo", responsavel: "Pai da Casa", descricao: "Encontro da Casa" }]),
+    });
+  });
+  await authenticate(page);
+  await page.goto("/calendario");
+  await expect(page.getByRole("heading", { name: "Gira retornada pela API" })).toBeVisible();
+  await expect(page.getByText("Caboclo", { exact: true })).toBeVisible();
+});
+
+test("exibe a próxima gira no site público usando dataHora", async ({ page }) => {
+  await page.route(`${apiUrl}/Gira`, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([{ id: 8, nome: "Próxima gira pública", dataHora: "2030-12-10T20:00:00Z", cura: "Caboclo" }]),
+    });
+  });
+  await page.route(`${apiUrl}/TextoPonto`, async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
+  });
+  await page.route(`${apiUrl}/instagram`, async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: [] }) });
+  });
+  await page.goto("/site");
+  await expect(page.getByRole("heading", { name: "Próxima gira pública" })).toBeVisible();
 });
