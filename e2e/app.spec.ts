@@ -54,6 +54,11 @@ test.describe("navegação e acesso", () => {
     await expect(page.locator('script[src="https://w.behold.so/widget.js"]')).toHaveCount(1);
   });
 
+  test("aceita a rota pública com S maiúsculo", async ({ page }) => {
+    await page.goto("/Site", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/site$/);
+  });
+
   test("redireciona a raiz para login", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveURL(/\/login$/);

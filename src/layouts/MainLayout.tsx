@@ -4,6 +4,7 @@ import { clearToken, getCurrentUser, hasUserRole } from "../auth/token";
 import { getCurrentUserProfile, type UserProfile } from "../services/userService";
 import { useState } from "react";
 import { useEffect } from "react";
+import { APP_VERSION } from "../config/version";
 
 
 
@@ -77,6 +78,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           ))}
         </nav>
         <div className={`border-t border-gray-200 ${sidebarCollapsed ? "p-3" : "p-4"}`}>
+          {!sidebarCollapsed && <p className="mb-2 text-center text-[10px] uppercase tracking-wider text-gray-400">Versão {APP_VERSION}</p>}
           <button
             type="button"
             onClick={toggleSidebar}
