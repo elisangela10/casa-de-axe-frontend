@@ -16,3 +16,7 @@ yarn-error.log*
 test-results/
 playwright-report/
 blob-report/
+
+# Documentos de trabalho locais
+AUDITORIA-MELHORIAS.md
+PROMPT-BACKEND-INSTAGRAM.md

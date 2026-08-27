@@ -2,7 +2,7 @@
 
 ## Contexto
 
-Temos um frontend React/Vite para a Casa de Axé Ilê Tenda São Gerônimo.
+Temos um frontend React/Vite para a Casa de Axé Ilê Tenda São Jerônimo.
 
 Foi criada uma página pública em `/site` que apresenta:
 
@@ -321,4 +321,3 @@ https://www.instagram.com/tendasaojeronimo_/
 ```
 
 Cada item da galeria deve abrir a publicação original no Instagram ao ser selecionado.
-

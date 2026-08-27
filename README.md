@@ -1,9 +1,9 @@
 # casa-de-axe-frontend
 
-CRM da Casa de Axé Ilê Tenda São Gerônimo.
+CRM da Casa de Axé Ilê Tenda São Jerônimo.
 # Casa de Axé Frontend
 
-Frontend React + TypeScript do CRM da Casa de Axé Ilê Tenda São Gerônimo.
+Frontend React + TypeScript do CRM da Casa de Axé Ilê Tenda São Jerônimo.
 
 ## Stack
 - React 18
