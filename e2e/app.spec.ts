@@ -30,6 +30,11 @@ async function mockApi(page: Page) {
       await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ id: 10, ...payload }) });
       return;
     }
+    if (request.method() === "POST" && url.endsWith("/Gira")) {
+      const payload = request.postDataJSON();
+      await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ id: 11, ...payload, status: "Ativo" }) });
+      return;
+    }
     if (request.method() === "GET" && (url.endsWith("/Guia") || url.endsWith("/Gira"))) {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([]) });
       return;
@@ -122,6 +127,8 @@ test.describe("módulos autenticados", () => {
     await page.getByLabel("Data e hora *").fill("2030-12-10T20:00");
     await page.getByLabel("Título *").fill("Gira de Teste");
     await page.getByLabel("Linha da gira *").selectOption({ index: 1 });
+    await page.getByLabel("Guia responsável").fill("Pai de Santo");
+    await page.getByLabel("Observações").fill("Descrição da gira de teste");
     await page.getByRole("button", { name: "Salvar gira" }).click();
     await expect(page.getByRole("heading", { name: "Gira de Teste" })).toBeVisible();
     await expect(page.getByText("Exu", { exact: true })).toBeVisible();

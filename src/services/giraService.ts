@@ -7,6 +7,7 @@ export type Gira = {
   guiaCura: string;
   descricao?: string;
   linha?: string;
+  linhaDaGira?: string;
   status?: string | number;
   dataCriacao?: string;
 };
@@ -39,7 +40,8 @@ export function normalizeGira(value: RawGira): Gira {
     titulo: asString(value.titulo ?? value.Titulo ?? value.tituloGira ?? value.TituloGira ?? value.nome ?? value.Nome ?? value.name ?? value.Name ?? value.title ?? value.Title),
     guiaCura: asString(value.guiaCura ?? value.GuiaCura ?? value.guia ?? value.Guia ?? value.cura ?? value.Cura ?? value.responsavel ?? value.Responsavel ?? value.responsibleGuide ?? value.ResponsibleGuide),
     descricao: asString(value.descricao ?? value.Descricao ?? value.description ?? value.Description),
-    linha: asString(value.linha ?? value.Linha ?? value.linhaGira ?? value.LinhaGira ?? value.tipoGira ?? value.TipoGira ?? value.tipo ?? value.Tipo ?? value.categoria ?? value.Categoria ?? value.category ?? value.Category),
+    linha: asString(value.linhaDaGira ?? value.LinhaDaGira ?? value.linha ?? value.Linha ?? value.linhaGira ?? value.LinhaGira ?? value.tipoGira ?? value.TipoGira ?? value.tipo ?? value.Tipo ?? value.categoria ?? value.Categoria ?? value.category ?? value.Category),
+    linhaDaGira: asString(value.linhaDaGira ?? value.LinhaDaGira ?? value.linha ?? value.Linha ?? value.linhaGira ?? value.LinhaGira),
     status: (value.status ?? value.Status) as string | number | undefined,
     dataCriacao: asString(value.dataCriacao ?? value.DataCriacao ?? value.createdAt ?? value.CreatedAt),
   };
@@ -66,6 +68,7 @@ function toApiPayload(form: GiraForm) {
     descricao: form.descricao.trim(),
     cura: form.guiaCura.trim(),
     responsavel: form.guiaCura.trim(),
+    linhaDaGira: form.linha.trim(),
     dataHora: new Date(form.data).toISOString(),
   };
 }
@@ -79,7 +82,8 @@ function mergeSavedGira(response: RawGira, form: GiraForm): Gira {
     titulo: normalized.titulo || form.titulo.trim(),
     guiaCura: normalized.guiaCura || form.guiaCura.trim(),
     descricao: normalized.descricao || form.descricao.trim(),
-    linha: normalized.linha || form.linha.trim(),
+    linha: normalized.linha || normalized.linhaDaGira || form.linha.trim(),
+    linhaDaGira: normalized.linhaDaGira || normalized.linha || form.linha.trim(),
   };
 }
 
@@ -90,9 +94,11 @@ export async function createGira(form: GiraForm): Promise<Gira> {
 
 export async function updateGira(id: number, form: GiraForm): Promise<Gira> {
   const response = await api.put(`${ENDPOINT}/${id}`, {
+    nome: form.titulo.trim(),
     descricao: form.descricao.trim(),
     cura: form.guiaCura.trim(),
     responsavel: form.guiaCura.trim(),
+    linhaDaGira: form.linha.trim(),
     dataHora: new Date(form.data).toISOString(),
     status: 1,
   });

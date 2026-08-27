@@ -38,7 +38,15 @@ export default function Calendario() {
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!formData.data || !formData.titulo.trim()) { setError("Informe a data e o título da gira."); return; }
+    const titulo = formData.titulo.trim();
+    const descricao = formData.descricao.trim();
+    const guia = formData.guiaCura.trim();
+    const linha = formData.linha.trim();
+    if (!formData.data || Number.isNaN(new Date(formData.data).getTime())) { setError("Informe uma data válida para a gira."); return; }
+    if (titulo.length < 3 || titulo.length > 120) { setError("O nome da gira deve ter entre 3 e 120 caracteres."); return; }
+    if (descricao.length < 3 || descricao.length > 2000) { setError("A descrição deve ter entre 3 e 2000 caracteres."); return; }
+    if (guia.length < 2 || guia.length > 500) { setError("A cura e o responsável devem ter entre 2 e 500 caracteres."); return; }
+    if (linha.length < 2 || linha.length > 120) { setError("A linha da gira deve ter entre 2 e 120 caracteres."); return; }
     setSaving(true); setError("");
     try {
       let saved: Gira;
