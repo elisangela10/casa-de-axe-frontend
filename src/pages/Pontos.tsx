@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 import { getApiErrorMessage } from "../services/api";
 import { createPonto, deletePonto, listPontos, Ponto, updatePonto } from "../services/pontoService";
 import { getLinhaCasaColor, LINHAS_CASA } from "../constants/linhasCasa";
+import { getSocialLinkInfo } from "../utils/socialLink";
 
 const CATEGORIAS = LINHAS_CASA;
 
@@ -208,6 +209,7 @@ export default function Pontos() {
           {pontosFiltrados.map((ponto) => {
             const isExpanded = expandedId === ponto.id;
             const ytId = getYoutubeId(ponto.linkDoYouTube);
+            const socialLink = getSocialLinkInfo(ponto.linkDoYouTube);
             const badgeClass = getLinhaCasaColor(ponto.categoriaDoPontos);
 
             return (
@@ -239,15 +241,15 @@ export default function Pontos() {
 
                   {/* Ações */}
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    {ytId && (
+                    {ponto.linkDoYouTube && (
                       <a
                         href={ponto.linkDoYouTube}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                        title="Abrir no YouTube"
+                        className={`p-2 text-gray-400 transition-colors ${socialLink.color}`}
+                        title={`Abrir no ${socialLink.label}`}
                       >
-                        <i className="bi-youtube text-lg" />
+                        <i className={`${socialLink.icon} text-lg`} />
                       </a>
                     )}
                     <button
@@ -305,7 +307,7 @@ export default function Pontos() {
                       </div>
                     ) : ponto.linkDoYouTube ? (
                       <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <i className="bi-link-45deg" />
+                        <i className={socialLink.icon} />
                         <a href={ponto.linkDoYouTube} target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-700 break-all">
                           {ponto.linkDoYouTube}
                         </a>
@@ -386,20 +388,20 @@ export default function Pontos() {
                 </select>
               </div>
 
-              {/* Link YouTube */}
+              {/* Link de referência */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Link do YouTube
+                  Link de referência (YouTube, Instagram, Facebook ou TikTok)
                   <span className="text-gray-400 font-normal ml-1">(opcional)</span>
                 </label>
                 <div className="relative">
-                  <i className="bi-youtube absolute left-3 top-1/2 -translate-y-1/2 text-red-500 text-lg" />
+                    <i className="bi-link-45deg absolute left-3 top-1/2 -translate-y-1/2 text-amber-600 text-lg" />
                   <input
                     type="url"
                     value={formData.linkDoYouTube}
                     onChange={(e) => setFormData({ ...formData, linkDoYouTube: e.target.value })}
                     className="w-full pl-10 pr-4 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all"
-                    placeholder="https://www.youtube.com/watch?v=..."
+                    placeholder="https://www.youtube.com/..."
                   />
                 </div>
               </div>

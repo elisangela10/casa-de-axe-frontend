@@ -5,6 +5,7 @@ import { getCurrentUserProfile, type UserProfile } from "../services/userService
 import { useState } from "react";
 import { useEffect } from "react";
 import { APP_VERSION } from "../config/version";
+import PushNotificationButton from "../components/PushNotificationButton";
 
 
 
@@ -114,6 +115,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             </h2>
           </div>
           <div className="flex items-center gap-4">
+            <PushNotificationButton />
             <div className="hidden text-right sm:block">
               <p className="text-sm font-semibold text-gray-800">{user?.nomeCompleto || user?.username || "Usuário"}</p>
               <p className="text-xs text-gray-500">{user?.roleNome || user?.role || "Membro"}</p>
