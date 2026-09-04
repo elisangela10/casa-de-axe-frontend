@@ -4,7 +4,7 @@
 
 ## Visão geral
 
-O projeto é um CRM para a Casa de Axé Ilê Tenda São Jerônimo, desenvolvido com React, TypeScript e Vite.
+O projeto é um CRM para a Casa de Axé Ilê Tenda São Gerônimo, desenvolvido com React, TypeScript e Vite.
 
 Atualmente, a aplicação possui:
 
