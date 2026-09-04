@@ -10,9 +10,10 @@ import NotFound from "../pages/NotFound";
 import SitePublico from "../pages/SitePublico";
 import PrivateRoute from "../components/PrivateRoute";
 import InstagramFeed from "../components/InstagramFeed";
+import InstallPwaButton from "../components/InstallPwaButton";
 
 function SiteComInstagram() {
-  return <><SitePublico /><InstagramFeed targetSelector="#instagram" /></>;
+  return <><SitePublico /><InstagramFeed targetSelector="#instagram" /><InstallPwaButton /></>;
 }
 
 export default function AppRoutes() {

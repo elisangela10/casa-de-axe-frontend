@@ -1,0 +1,14 @@
+{
+  "name": "Ilê Tenda São Jerônimo",
+  "short_name": "São Jerônimo",
+  "description": "Casa de Axé Ilê Tenda São Jerônimo",
+  "start_url": "/site",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fbf8f3",
+  "theme_color": "#92400e",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/images/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
