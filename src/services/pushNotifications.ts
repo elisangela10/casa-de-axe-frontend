@@ -25,3 +25,10 @@ export async function getCurrentPushSubscription(): Promise<PushSubscription | n
   const registration = await navigator.serviceWorker.ready;
   return registration.pushManager.getSubscription();
 }
+
+export async function unsubscribeFromPush(): Promise<void> {
+  const subscription = await getCurrentPushSubscription();
+  if (!subscription) return;
+  await api.delete("/Notificacoes/inscricao", { data: { endpoint: subscription.endpoint } });
+  await subscription.unsubscribe();
+}
