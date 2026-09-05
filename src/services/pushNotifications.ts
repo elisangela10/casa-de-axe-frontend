@@ -19,3 +19,9 @@ export async function subscribeToPush(): Promise<PushSubscription> {
   await api.post("/Notificacoes/inscricao", { endpoint: json.endpoint, keys: { p256dh: json.keys.p256dh, auth: json.keys.auth }, userAgent: navigator.userAgent });
   return subscription;
 }
+
+export async function getCurrentPushSubscription(): Promise<PushSubscription | null> {
+  if (!("serviceWorker" in navigator)) return null;
+  const registration = await navigator.serviceWorker.ready;
+  return registration.pushManager.getSubscription();
+}
